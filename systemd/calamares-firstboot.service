@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: MIT
+
+[Unit]
+Description=Calamares initial setup configuration program
+After=livesys.service plymouth-quit-wait.service
+After=systemd-vconsole-setup.service
+Requires=systemd-localed.service
+After=systemd-localed.service
+Before=sddm.service display-manager.service
+
+[Service]
+# These environment variables tell pam_systemd that this is a session with a seat
+Environment="XDG_SEAT=seat0"
+Environment="XDG_VTNR=1"
+Environment="XDG_SESSION_TYPE=wayland"
+Environment="XDG_SESSION_CLASS=greeter"
+Environment="XDG_SESSION_DESKTOP=none"
+Type=oneshot
+TimeoutSec=0
+RemainAfterExit=yes
+ExecStartPre=-/bin/plymouth quit
+# `runuser` triggers a new session via pam_systemd, to make everything work.
+ExecStart=/sbin/runuser -l root -c /usr/libexec/calamares-firstboot/setup.sh
+
+[Install]
+WantedBy=multi-user.target
