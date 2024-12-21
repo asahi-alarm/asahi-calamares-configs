@@ -77,7 +77,11 @@ zoom
 menu
 EOF
 
-kwin_x11 &
+if [ -x /usr/bin/mutter ]; then
+    mutter &
+else
+    kwin_x11 &
+fi
 
 sleep 0.2
 
@@ -152,4 +156,4 @@ esac
 
 export DEFAULT_XKBMODEL DEFAULT_XKBLAYOUT DEFAULT_XKBVARIANT
 
-calamares && systemctl disable calamares.service && usermod -p '*' root
+calamares -c /usr/share/calamares-asahi/
