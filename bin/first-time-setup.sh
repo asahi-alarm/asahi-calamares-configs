@@ -79,13 +79,14 @@ EOF
 
 if [ -x /usr/bin/mutter ]; then
     mutter &
+    feh --zoom fill -N -F /usr/share/backgrounds/gnome/adwaita-d.jxl &
 else
     kwin_x11 &
+    feh --zoom fill -N -F $(ls /usr/share/wallpapers/Next/contents/images/5120x2880* | head -n 1) &
 fi
 
 sleep 0.2
 
-feh --zoom fill -N -F $(ls /usr/share/wallpapers/Next/contents/images/5120x2880* | head -n 1) &
 
 country="00"
 for country_file in $(find /sys/devices/platform -name country -path '*05AC:*'); do
