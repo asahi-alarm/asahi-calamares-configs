@@ -231,5 +231,6 @@ Model=$xkbmodel
 EOF
         chown "$uidgid" "$userhome/.config" "$userhome/.config/kxkbrc"
     fi
-    systemctl disable calamares-firstboot.service
+    systemctl disable calamares.service && usermod -p '*' root
+
 fi
