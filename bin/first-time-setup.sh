@@ -4,7 +4,7 @@
 
 WALLPAPER_FILE="/usr/share/backgrounds/default.png"
 
-trap 'killall -9 kwin_wayland calamares plasmashell mutter' EXIT SIGINT SIGTERM
+trap 'killall -9 kwin_wayland calamares plasmashell mutter || true' EXIT SIGINT SIGTERM
 
 # Wait for the drivers to load
 udevadm settle
