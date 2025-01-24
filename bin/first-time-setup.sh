@@ -1,7 +1,5 @@
 #!/usr/bin/sh
 
-. /etc/os-release
-
 WALLPAPER_FILE="/usr/share/backgrounds/default.png"
 
 trap 'killall -9 kwin_wayland calamares plasmashell mutter || true' EXIT SIGINT SIGTERM
@@ -170,15 +168,6 @@ cat >.config/kactivitymanagerdrc <<EOF
 currentActivity=1d1809e0-5c93-4423-b0f3-93646408cfa6
 EOF
 
-# Set up HiDPI configs for sddm (on <=F39 only )
-if [ "$HIDPI" == 1 ] && [ "$VERSION_ID" -lt 40 ]; then
-    mkdir -p /etc/sddm.conf.d/
-    cat >/etc/sddm.conf.d/dpi.conf <<EOF
-[General]
-GreeterEnvironment=QT_WAYLAND_SHELL_INTEGRATION=layer-shell,QT_SCALE_FACTOR=1.5
-EOF
-fi
-
 # Set up user session environment, so stuff launches properly
 export WAYLAND_DISPLAY=wayland-0
 export QT_QPA_PLATFORM=wayland
@@ -198,17 +187,19 @@ for i in $(seq 1 50); do
 done
 
 if [ ! -e "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ]; then
-    echo "KWin failed to start!"
+    echo "windowmanager failed to start!"
     exit 1
 fi
 
-# Configure display scale if needed
-if [ "$HIDPI" == 1 ]; then
-    kscreen-doctor output.eDP-1.scale.1.5
-fi
-
 # Start plasmashell to get a wallpaper
-plasmashell &
+if [ ! -x /usr/bin/mutter ]; then
+    # Configure display scale if needed
+    if [ "$HIDPI" == 1 ]; then
+        kscreen-doctor output.eDP-1.scale.1.5
+    fi
+
+    plasmashell &
+fi
 
 # Delay a bit for visual consistency
 sleep 0.3
