@@ -1,7 +1,7 @@
 PREFIX=/usr/local
 
-SCRIPTS=bin/first-time-setup.sh bin/first-time-setup-finished.sh
-UNITS=calamares.service
+SCRIPTS=bin/first-time-setup.sh bin/first-time-setup-x11.sh bin/first-time-setup-finished.sh
+UNITS=calamares.service calamares-x11.service
 MULTI_USER_WANTS=calamares.service
 
 install:

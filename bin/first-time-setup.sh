@@ -223,5 +223,4 @@ EOF
         chown "$uidgid" "$userhome/.config" "$userhome/.config/kxkbrc"
     fi
     systemctl disable calamares.service && usermod -p '*' root
-
 fi

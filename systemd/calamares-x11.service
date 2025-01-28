@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: MIT
+
+[Unit]
+Description=Interactive setup wizard
+Before=lightdm.service display-manager.service
+After=systemd-user-sessions.service getty@tty1.service systemd-logind.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+TimeoutStartSec=3600
+ExecStart=startx /usr/bin/first-time-setup-x11.sh
+
+[Install]
+WantedBy=multi-user.target
