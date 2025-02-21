@@ -222,5 +222,7 @@ Model=$xkbmodel
 EOF
         chown "$uidgid" "$userhome/.config" "$userhome/.config/kxkbrc"
     fi
-    systemctl disable calamares.service && usermod -p '*' root
+    systemctl disable calamares.service
+    usermod -p '*' root
+    pacman -Rdd calamares
 fi
