@@ -95,5 +95,4 @@ EOF
     fi
     systemctl disable calamares-x11.service
     usermod -p '*' root
-    pacman -Rdd calamares
 fi

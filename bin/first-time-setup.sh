@@ -224,5 +224,4 @@ EOF
     fi
     systemctl disable calamares.service
     usermod -p '*' root
-    pacman -Rdd calamares
 fi
