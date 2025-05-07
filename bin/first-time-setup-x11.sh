@@ -7,7 +7,13 @@ zoom
 menu
 EOF
 
-feh --zoom fill -N -F /usr/share/backgrounds/xfce/xfce-blue.jpg &
+BACKGROUND=/usr/share/backgrounds/xfce/xfce-blue.jpg
+
+if [ ! -f $BACKGROUND ]; then
+    BACKGROUND=/usr/share/lxqt/wallpapers/waves-logo.png
+fi
+
+feh --zoom fill -N -F $BACKGROUND &
 
 country="00"
 for country_file in $(find /sys/devices/platform -name country -path '*05AC:*'); do
