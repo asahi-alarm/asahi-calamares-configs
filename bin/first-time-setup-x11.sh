@@ -7,13 +7,15 @@ zoom
 menu
 EOF
 
-BACKGROUND=/usr/share/backgrounds/xfce/xfce-blue.jpg
+XFCE=/usr/share/backgrounds/xfce/xfce-blue.jpg
+LXQT=/usr/share/lxqt/wallpapers/waves-logo.png
+MATE=/usr/share/backgrounds/mate/desktop/GreenTraditional.jpg
 
-if [ ! -f $BACKGROUND ]; then
-    BACKGROUND=/usr/share/lxqt/wallpapers/waves-logo.png
-fi
-
-feh --zoom fill -N -F $BACKGROUND &
+for candidate in "$XFCE" "$MATE" "$LXQT"; do
+  if [ -f "$candidate" ]; then
+    feh --zoom fill -N -F "$candidate" &
+  fi
+done
 
 country="00"
 for country_file in $(find /sys/devices/platform -name country -path '*05AC:*'); do
