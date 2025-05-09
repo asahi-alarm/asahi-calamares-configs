@@ -2,7 +2,7 @@
 
 WALLPAPER_FILE="/usr/share/backgrounds/default.png"
 
-trap 'killall -9 kwin_wayland calamares plasmashell mutter || true' EXIT SIGINT SIGTERM
+trap 'killall -9 kwin_wayland calamares plasmashell mutter labwc || true' EXIT SIGINT SIGTERM
 
 # Wait for the drivers to load
 udevadm settle
@@ -176,6 +176,10 @@ systemctl --user import-environment WAYLAND_DISPLAY QT_QPA_PLATFORM XDG_RUNTIME_
 # Start KWin
 if [ -x /usr/bin/mutter ]; then
     mutter --wayland &
+elif [ -x /usr/bin/hyprland ]; then
+    # reset WAYLAND_DISPLAY for labwc to start up
+    unset WAYLAND_DISPLAY
+    labwc &
 else
     kwin_wayland --drm --no-global-shortcuts --no-lockscreen --locale1 &
 fi
