@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: MIT
 
 [Unit]
-Description=Interactive setup wizard
-Before=gdm.service sddm.service display-manager.service
+Description=Interactive setup wizard (cage)
+Before=gdm.service sddm.service lightdm.service cosmic-greeter.service display-manager.service
 After=systemd-user-sessions.service getty@tty1.service systemd-logind.service
 
 [Service]
@@ -16,7 +16,7 @@ TimeoutSec=0
 Type=oneshot
 RemainAfterExit=yes
 TimeoutStartSec=3600
-ExecStart=/sbin/runuser -l root -c /usr/bin/first-time-setup.sh
+ExecStart=/sbin/runuser -l root -c /usr/bin/first-time-setup-cage.sh
 
 [Install]
 WantedBy=multi-user.target

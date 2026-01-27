@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: no
+# SPDX-License-Identifier: CC0-1.0
+---
+type: viewmodule
+name: de-packages
+interface: qtplugin
+load: libcalamares_viewmodule_depackages.so

@@ -179,10 +179,8 @@ images:
 # branding component also ships a stylesheet.qss. Then they are
 # the corresponding CSS attributes of #sidebarApp.
 style:
-   sidebarBackground:    "#2c2c2c"
-   sidebarText:          "#FFFFFF"
-   sidebarTextSelect:    "#2c2c2c"
-   sidebarTextHighlight: "#d3506f"
+   SidebarBackground:    "#2c2c2c"
+   SidebarText:          "#FFFFFF"
 
 ### SLIDESHOW
 #
