@@ -1,6 +1,6 @@
-#!/usr/bin/sh
+#!/usr/bin/env bash
 
-trap 'killall -9 cage calamares foot || true' EXIT SIGINT SIGTERM
+trap 'killall -9 cage calamares || true' EXIT SIGINT SIGTERM
 
 # Wait for the drivers to load
 udevadm settle
