@@ -46,9 +46,17 @@ QPushButton { background-color: green; }
  * delegate code.
  */
 
+#sidebarApp {
+    background-color: #2c2c2c;
+    color: #FFFFFF;
+}
+
+#sidebarApp QLabel {
+    color: #FFFFFF;
+}
+
 /*
 #mainApp { }
-#sidebarApp { }
 #logoApp { }
 */
 
