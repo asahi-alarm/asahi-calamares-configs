@@ -1,6 +1,6 @@
 PREFIX=/usr
 
-SCRIPTS=bin/first-time-setup-cage.sh bin/asahi-de-configure.sh
+SCRIPTS=bin/first-time-setup-cage.sh bin/asahi-de-configure.sh bin/asahi-install-packages.sh
 UNITS=calamares-cage.service
 MULTI_USER_WANTS=calamares-cage.service
 

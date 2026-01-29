@@ -508,6 +508,18 @@ DePackagesViewStep::applySelection( const QString& selection )
         cWarning() << "de-packages: could not write desktop selection" << deFile.errorString();
     }
 
+    QFile pkgFile( QStringLiteral( "/tmp/calamares-packages" ) );
+    if ( pkgFile.open( QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text ) )
+    {
+        QTextStream out( &pkgFile );
+        out << config.packages.join( QStringLiteral( " " ) );
+        pkgFile.close();
+    }
+    else
+    {
+        cWarning() << "de-packages: could not write package list" << pkgFile.errorString();
+    }
+
     const QString username = gs->value( QStringLiteral( "username" ) ).toString();
     if ( !username.isEmpty() )
     {

@@ -302,7 +302,7 @@ EOF
 fi
 
 # Clean up the temporary files
-rm -f /tmp/calamares-dm /tmp/calamares-de /tmp/calamares-user
+rm -f /tmp/calamares-dm /tmp/calamares-de /tmp/calamares-user /tmp/calamares-packages
 
 # Remove cage (no longer needed after setup)
 echo "Cleaning up unneeded packages..."
