@@ -47,13 +47,13 @@ const QHash< QString, DesktopConfig > s_desktops = {
           QStringList{
               QStringLiteral( "plasma-meta" ),
               QStringLiteral( "kde-applications-meta" ),
-              QStringLiteral( "sddm" ),
+              QStringLiteral( "plasma-login-manager" ),
               QStringLiteral( "konsole" ),
               QStringLiteral( "dolphin" ),
               QStringLiteral( "audacity" ),
               QStringLiteral( "qt6-multimedia-gstreamer" ),
           },
-          QStringLiteral( "sddm" ),
+          QStringLiteral( "plasma-login-manager" ),
       } },
     { QStringLiteral( "gnome" ),
       DesktopConfig{

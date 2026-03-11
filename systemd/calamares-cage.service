@@ -2,7 +2,7 @@
 
 [Unit]
 Description=Interactive setup wizard (cage)
-Before=gdm.service sddm.service lightdm.service cosmic-greeter.service display-manager.service
+Before=gdm.service sddm.service plasmalogin.service lightdm.service cosmic-greeter.service display-manager.service
 After=systemd-user-sessions.service getty@tty1.service systemd-logind.service
 
 [Service]
