@@ -20,7 +20,7 @@ MOC = /usr/lib/qt6/moc
 CXXFLAGS = -std=c++17 -fPIC -Wall -Wextra -O2 \
            $(QT_CFLAGS) \
            -I$(CALAMARES_INCLUDE) \
-           -DPLUGGINDLLEXPORT_PRO \
+           -DPLUGINDLLEXPORT_PRO \
            -DQT_PLUGIN
 
 LDFLAGS = -shared $(QT_LIBS) -L/usr/lib -lcalamares -lcalamaresui
