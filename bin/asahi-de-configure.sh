@@ -16,7 +16,7 @@ DM=$(cat /tmp/calamares-dm 2>/dev/null || echo "sddm")
 echo "Configuring display manager: $DM"
 
 case "$DM" in
-"plasmalogin")
+"plasma-login-manager")
     systemctl enable plasmalogin.service
     ;;
 "sddm")
