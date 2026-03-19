@@ -32,6 +32,9 @@
 #include <QPalette>
 #include <QFileInfo>
 #include <QPainter>
+#include <QPlainTextEdit>
+#include <QLineEdit>
+#include <QRegularExpression>
 
 namespace
 {
@@ -365,7 +368,8 @@ DePackagesViewStep::buildChoicesUi( QWidget* page, QVBoxLayout* layout )
 
     for ( const DesktopChoice& choice : choices )
     {
-        if ( !s_desktops.contains( choice.id ) )
+        const bool isCustom = ( choice.id == QStringLiteral( "custom" ) );
+        if ( !isCustom && !s_desktops.contains( choice.id ) )
         {
             cWarning() << "de-packages: configuration references unknown desktop" << choice.id;
             continue;
@@ -404,6 +408,49 @@ DePackagesViewStep::buildChoicesUi( QWidget* page, QVBoxLayout* layout )
         auto* button = new QRadioButton( choice.name, frame );
         button->setProperty( "choiceId", choice.id );
         optionLayout->addWidget( button );
+
+        if ( isCustom )
+        {
+            auto* customContainer = new QWidget( frame );
+            auto* customLayout = new QVBoxLayout( customContainer );
+            customLayout->setContentsMargins( 0, 6, 0, 0 );
+            customLayout->setSpacing( 6 );
+
+            auto* packagesLabel = new QLabel( tr( "Packages (space-separated):" ), customContainer );
+            customLayout->addWidget( packagesLabel );
+
+            m_customPackagesEdit = new QPlainTextEdit( customContainer );
+            m_customPackagesEdit->setPlaceholderText(
+                tr( "e.g. plasma-meta konsole dolphin sddm" ) );
+            m_customPackagesEdit->setMaximumHeight( 80 );
+            customLayout->addWidget( m_customPackagesEdit );
+
+            auto* dmLabel = new QLabel( tr( "Display manager:" ), customContainer );
+            customLayout->addWidget( dmLabel );
+
+            m_customDmEdit = new QLineEdit( customContainer );
+            m_customDmEdit->setPlaceholderText( tr( "e.g. sddm, gdm, lightdm" ) );
+            customLayout->addWidget( m_customDmEdit );
+
+            customContainer->setVisible( false );
+            m_customWidget = customContainer;
+            optionLayout->addWidget( customContainer );
+
+            connect(
+                m_customPackagesEdit, &QPlainTextEdit::textChanged, this, [this]() {
+                    if ( m_lastSelection == QStringLiteral( "custom" ) )
+                    {
+                        applySelection( QStringLiteral( "custom" ) );
+                    }
+                } );
+            connect(
+                m_customDmEdit, &QLineEdit::textChanged, this, [this]() {
+                    if ( m_lastSelection == QStringLiteral( "custom" ) )
+                    {
+                        applySelection( QStringLiteral( "custom" ) );
+                    }
+                } );
+        }
 
         m_choiceGroup->addButton( button );
         rowLayout->addLayout( optionLayout, 1 );
@@ -451,6 +498,11 @@ DePackagesViewStep::handleSelectionChanged( const QString& selectionId )
         return;
     }
 
+    if ( m_customWidget )
+    {
+        m_customWidget->setVisible( selectionId == QStringLiteral( "custom" ) );
+    }
+
     gs->insert( QStringLiteral( "packagechooser_packagechooser" ), selectionId );
     applySelection( selectionId );
 }
@@ -467,19 +519,72 @@ DePackagesViewStep::applySelection( const QString& selection )
         return false;
     }
 
-    const auto it = s_desktops.constFind( selection );
-    if ( it == s_desktops.constEnd() )
+    QStringList packages;
+    QString displayManager;
+
+    if ( selection == QStringLiteral( "custom" ) )
     {
-        cWarning() << "de-packages: unknown desktop selection" << selection;
-        setStatusMessage( tr( "%1 is not a supported desktop choice." ).arg( selection ), true );
-        setCanProceed( false );
-        return false;
+        if ( !m_customPackagesEdit )
+        {
+            setStatusMessage( tr( "Custom package input is not available." ), true );
+            setCanProceed( false );
+            return false;
+        }
+
+        const QString rawText = m_customPackagesEdit->toPlainText().trimmed();
+        if ( rawText.isEmpty() )
+        {
+            setStatusMessage( tr( "Enter at least one package to continue." ), true );
+            setCanProceed( false );
+            m_lastSelection = selection;
+            selectButtonForId( selection );
+            return false;
+        }
+
+        packages.append( QStringLiteral( "asahi-desktop-meta" ) );
+
+        const QStringList tokens = rawText.split( QRegularExpression( QStringLiteral( "\\s+" ) ),
+                                                   Qt::SkipEmptyParts );
+        for ( const QString& token : tokens )
+        {
+            const QString pkg = token.trimmed();
+            if ( pkg != QStringLiteral( "asahi-desktop-meta" ) )
+            {
+                packages.append( pkg );
+            }
+        }
+
+        displayManager = m_customDmEdit ? m_customDmEdit->text().trimmed() : QString();
+        if ( displayManager.isEmpty() )
+        {
+            setStatusMessage( tr( "Enter a display manager to continue." ), true );
+            setCanProceed( false );
+            m_lastSelection = selection;
+            selectButtonForId( selection );
+            return false;
+        }
+        if ( !packages.contains( displayManager ) )
+        {
+            packages.append( displayManager );
+        }
+    }
+    else
+    {
+        const auto it = s_desktops.constFind( selection );
+        if ( it == s_desktops.constEnd() )
+        {
+            cWarning() << "de-packages: unknown desktop selection" << selection;
+            setStatusMessage( tr( "%1 is not a supported desktop choice." ).arg( selection ), true );
+            setCanProceed( false );
+            return false;
+        }
+
+        packages = it.value().packages;
+        displayManager = it.value().displayManager;
     }
 
-    const DesktopConfig& config = it.value();
-
     QVariantMap installOperation;
-    installOperation.insert( QStringLiteral( "install" ), config.packages );
+    installOperation.insert( QStringLiteral( "install" ), packages );
     QVariantList packageOperations;
     packageOperations.append( installOperation );
     gs->insert( QStringLiteral( "packageOperations" ), packageOperations );
@@ -488,7 +593,7 @@ DePackagesViewStep::applySelection( const QString& selection )
     if ( dmFile.open( QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text ) )
     {
         QTextStream out( &dmFile );
-        out << config.displayManager;
+        out << displayManager;
         dmFile.close();
     }
     else
@@ -512,7 +617,7 @@ DePackagesViewStep::applySelection( const QString& selection )
     if ( pkgFile.open( QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text ) )
     {
         QTextStream out( &pkgFile );
-        out << config.packages.join( QStringLiteral( " " ) );
+        out << packages.join( QStringLiteral( " " ) );
         pkgFile.close();
     }
     else
@@ -540,11 +645,11 @@ DePackagesViewStep::applySelection( const QString& selection )
     selectButtonForId( selection );
 
     cDebug() << "de-packages: selection" << selection;
-    cDebug() << "de-packages: packages" << config.packages;
-    cDebug() << "de-packages: display manager" << config.displayManager;
+    cDebug() << "de-packages: packages" << packages;
+    cDebug() << "de-packages: display manager" << displayManager;
 
     setStatusMessage(
-        tr( "%1 will install: %2." ).arg( selection, formatPackages( config.packages ) ),
+        tr( "%1 will install: %2." ).arg( selection, formatPackages( packages ) ),
         false );
     setCanProceed( true );
     return true;

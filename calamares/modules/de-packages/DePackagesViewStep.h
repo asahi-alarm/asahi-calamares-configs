@@ -23,6 +23,8 @@ class QButtonGroup;
 class QFrame;
 class QRadioButton;
 class QLabel;
+class QPlainTextEdit;
+class QLineEdit;
 
 struct DesktopChoice
 {
@@ -85,6 +87,9 @@ private:
     QString m_statusMessage;
     bool m_statusIsError = false;
     bool m_canProceed = false;
+    QWidget* m_customWidget = nullptr;
+    QPlainTextEdit* m_customPackagesEdit = nullptr;
+    QLineEdit* m_customDmEdit = nullptr;
     QColor m_frameBorderColor;
     QColor m_frameHighlightColor;
     QColor m_frameHighlightBackground;
