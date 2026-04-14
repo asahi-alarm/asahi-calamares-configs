@@ -123,7 +123,7 @@ unset DISPLAY
 unset WAYLAND_DISPLAY
 
 # Set Qt to use Wayland (cage will set WAYLAND_DISPLAY for the child process)
-export QT_QPA_PLATFORM=wayland
+export QT_QPA_PLATFORM=xcb
 # Force Fusion style to avoid theme issues with dark/light colors
 export QT_STYLE_OVERRIDE=Fusion
 export QT_QPA_PLATFORMTHEME=
