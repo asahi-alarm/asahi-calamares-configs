@@ -29,7 +29,7 @@ while [ $attempt -le $MAX_RETRIES ]; do
 
     # Sync database first (double -y to force refresh)
     echo "Synchronizing package database..."
-    if ! pacman -Syy --noconfirm; then
+    if ! pacman -Syy --noconfirm --disable-download-timeout; then
         echo "Warning: Database sync failed, retrying..."
         sleep $RETRY_DELAY
         attempt=$((attempt + 1))
@@ -38,7 +38,7 @@ while [ $attempt -le $MAX_RETRIES ]; do
 
     # Try to install packages
     echo "Installing packages..."
-    if pacman -S --noconfirm --needed $PACKAGES; then
+    if pacman -S --noconfirm --needed --disable-download-timeout $PACKAGES; then
         echo ""
         echo "=== Package installation successful ==="
         exit 0
