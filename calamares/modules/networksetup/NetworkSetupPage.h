@@ -10,6 +10,7 @@
 #include <QDBusObjectPath>
 
 class QLabel;
+class QLineEdit;
 class QTimer;
 class QListWidget;
 class QListWidgetItem;
@@ -45,6 +46,8 @@ private slots:
     void onConnect();
     void onItemDoubleClicked(QListWidgetItem* item);
     void checkConnection();
+    void onPasswordSubmit();
+    void onPasswordCancel();
 
 private:
     void setupUi();
@@ -57,6 +60,14 @@ private:
     QListWidget* m_networkList;
     QPushButton* m_scanBtn;
     QPushButton* m_connectBtn;
+
+    // Inline password entry
+    QWidget* m_passwordWidget;
+    QLabel* m_passwordLabel;
+    QLineEdit* m_passwordEdit;
+    QPushButton* m_passwordOkBtn;
+    QDBusObjectPath m_pendingApPath;
+    QString m_pendingSsid;
 
     QDBusConnection m_bus;
     QDBusObjectPath m_wirelessDevice;

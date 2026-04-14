@@ -15,8 +15,6 @@
 #include <QListWidget>
 #include <QLineEdit>
 #include <QCheckBox>
-#include <QDialog>
-#include <QDialogButtonBox>
 #include <QMessageBox>
 #include <QSet>
 #include <QTimer>
@@ -34,43 +32,6 @@ constexpr uint NM_DEVICE_STATE_ACTIVATED = 100;
 // NM 802.11 AP flags
 constexpr uint NM_802_11_AP_FLAGS_PRIVACY = 0x1;
 
-// Password dialog for WiFi networks
-class PasswordDialog : public QDialog
-{
-public:
-    explicit PasswordDialog(const QString& ssid, QWidget* parent = nullptr)
-        : QDialog(parent)
-    {
-        setWindowTitle(tr("WiFi Password"));
-        setMinimumWidth(300);
-
-        auto* layout = new QVBoxLayout(this);
-        layout->addWidget(new QLabel(QStringLiteral("<b>%1</b>").arg(ssid)));
-
-        m_passwordEdit = new QLineEdit();
-        m_passwordEdit->setEchoMode(QLineEdit::Password);
-        m_passwordEdit->setPlaceholderText(tr("Enter password"));
-        layout->addWidget(m_passwordEdit);
-
-        auto* showPassword = new QCheckBox(tr("Show password"));
-        connect(showPassword, &QCheckBox::toggled, this, [this](bool checked) {
-            m_passwordEdit->setEchoMode(checked ? QLineEdit::Normal : QLineEdit::Password);
-        });
-        layout->addWidget(showPassword);
-
-        auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-        connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
-        connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-        layout->addWidget(buttons);
-
-        connect(m_passwordEdit, &QLineEdit::returnPressed, this, &QDialog::accept);
-    }
-
-    QString password() const { return m_passwordEdit->text(); }
-
-private:
-    QLineEdit* m_passwordEdit;
-};
 
 
 NetworkSetupPage::NetworkSetupPage(QWidget* parent)
@@ -145,6 +106,41 @@ NetworkSetupPage::setupUi()
 
     btnLayout->addStretch();
     layout->addLayout(btnLayout);
+
+    // Inline password area (hidden by default)
+    m_passwordWidget = new QWidget();
+    auto* pwLayout = new QVBoxLayout(m_passwordWidget);
+    pwLayout->setContentsMargins(0, 0, 0, 0);
+
+    m_passwordLabel = new QLabel();
+    pwLayout->addWidget(m_passwordLabel);
+
+    m_passwordEdit = new QLineEdit();
+    m_passwordEdit->setEchoMode(QLineEdit::Password);
+    m_passwordEdit->setPlaceholderText(tr("Enter password"));
+    connect(m_passwordEdit, &QLineEdit::returnPressed, this, &NetworkSetupPage::onPasswordSubmit);
+    pwLayout->addWidget(m_passwordEdit);
+
+    auto* pwBtnLayout = new QHBoxLayout();
+    auto* showPassword = new QCheckBox(tr("Show password"));
+    connect(showPassword, &QCheckBox::toggled, this, [this](bool checked) {
+        m_passwordEdit->setEchoMode(checked ? QLineEdit::Normal : QLineEdit::Password);
+    });
+    pwBtnLayout->addWidget(showPassword);
+
+    m_passwordOkBtn = new QPushButton(tr("Connect"));
+    connect(m_passwordOkBtn, &QPushButton::clicked, this, &NetworkSetupPage::onPasswordSubmit);
+    pwBtnLayout->addWidget(m_passwordOkBtn);
+
+    auto* cancelBtn = new QPushButton(tr("Cancel"));
+    connect(cancelBtn, &QPushButton::clicked, this, &NetworkSetupPage::onPasswordCancel);
+    pwBtnLayout->addWidget(cancelBtn);
+
+    pwBtnLayout->addStretch();
+    pwLayout->addLayout(pwBtnLayout);
+
+    m_passwordWidget->hide();
+    layout->addWidget(m_passwordWidget);
 
     layout->addStretch();
 }
@@ -450,12 +446,27 @@ NetworkSetupPage::onConnect()
     }
     else
     {
-        PasswordDialog dlg(ssid, this);
-        if (dlg.exec() == QDialog::Accepted)
-        {
-            doConnect(apPath, ssid, true, dlg.password());
-        }
+        m_pendingApPath = apPath;
+        m_pendingSsid = ssid;
+        m_passwordLabel->setText(QStringLiteral("<b>%1</b>").arg(ssid));
+        m_passwordEdit->clear();
+        m_passwordWidget->show();
+        m_passwordEdit->setFocus();
     }
+}
+
+void
+NetworkSetupPage::onPasswordSubmit()
+{
+    m_passwordWidget->hide();
+    doConnect(m_pendingApPath, m_pendingSsid, true, m_passwordEdit->text());
+}
+
+void
+NetworkSetupPage::onPasswordCancel()
+{
+    m_passwordWidget->hide();
+    m_passwordEdit->clear();
 }
 
 // Type alias for NM connection settings: a{sa{sv}}
