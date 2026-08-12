@@ -1,7 +1,7 @@
 /* SPDX-FileCopyrightText: no
  * SPDX-License-Identifier: CC0-1.0
  *
- * Calamares network setup viewmodule using iwd via D-Bus
+ * Calamares network setup viewmodule
  */
 
 #ifndef NETWORKSETUPVIEWSTEP_H
