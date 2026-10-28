@@ -5,6 +5,27 @@
 
 set -e
 
+LOG=/var/log/asahi-install-packages.log
+
+# Re-run ourselves with all output mirrored into a log file opened with
+# O_SYNC, so it survives a crash of cage/calamares or the user rebooting
+# mid-install. tee -p keeps feeding the log when calamares (our stdout) dies.
+if [ -z "$ASAHI_INSTALL_LOGGING" ]; then
+    status_file=$(mktemp)
+    {
+        echo "=== $(date -Is) $0 ==="
+        rc=0
+        ASAHI_INSTALL_LOGGING=1 "$0" "$@" || rc=$?
+        echo "$rc" >"$status_file"
+        echo "=== $(date -Is) exit status $rc ==="
+    } 2>&1 | {
+        tee -p /dev/fd/3 | dd of="$LOG" oflag=append,sync conv=notrunc status=none
+    } 3>&1
+    rc=$(cat "$status_file" 2>/dev/null || echo 1)
+    rm -f "$status_file"
+    exit "$rc"
+fi
+
 MAX_RETRIES=5
 RETRY_DELAY=10
 
@@ -110,4 +131,5 @@ echo "=== All $MAX_RETRIES installation attempts failed ==="
 echo ""
 echo "Please check your internet connection and mirror configuration."
 echo "You can try running 'pacman -Syyu' manually after rebooting."
+echo "A full log of this run is kept in $LOG."
 exit 1
