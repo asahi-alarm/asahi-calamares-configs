@@ -40,9 +40,14 @@ esac
 # Read the desktop environment selection
 DE=$(cat /tmp/calamares-de 2>/dev/null || echo "")
 
-# Read the username from calamares
+# Read the username from calamares. The de-packages page comes before the
+# users page, so the file is usually empty; the users module has created the
+# account by now, so fall back to the first regular user.
 USER_NAME=$(cat /tmp/calamares-user 2>/dev/null || echo "")
-USER_HOME="/home/$USER_NAME"
+if [ -z "$USER_NAME" ]; then
+    USER_NAME=$(getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 { print $1; exit }')
+fi
+USER_HOME=$(getent passwd "$USER_NAME" | cut -d: -f6)
 
 # Configure DE-specific settings
 if [ "$DE" = "hyprland" ]; then

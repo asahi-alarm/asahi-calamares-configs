@@ -147,6 +147,7 @@ const QHash< QString, DesktopConfig > s_desktops = {
               QStringLiteral( "nwg-displays" ),
               QStringLiteral( "nwg-dock-hyprland" ),
               QStringLiteral( "waybar" ),
+              QStringLiteral( "otf-font-awesome" ),
               QStringLiteral( "sddm" ),
               QStringLiteral( "uwsm" ),
               QStringLiteral( "kitty" ),
