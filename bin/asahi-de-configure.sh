@@ -48,6 +48,13 @@ USER_HOME="/home/$USER_NAME"
 if [ "$DE" = "hyprland" ]; then
     echo "Configuring Hyprland..."
 
+    # Started with graphical-session.target, which Hyprland and uwsm both
+    # bring up once WAYLAND_DISPLAY is in the systemd user environment
+    systemctl --global enable hyprpolkitagent.service
+    # The portal is normally only D-Bus activated and has no [Install]
+    # section, so hook it into the session target explicitly
+    systemctl --global add-wants graphical-session.target xdg-desktop-portal-hyprland.service
+
     if [ -n "$USER_NAME" ] && [ -d "$USER_HOME" ]; then
         echo "Installing Hyprland config for user $USER_NAME at $USER_HOME"
         mkdir -p "$USER_HOME/.config/hypr"
@@ -74,8 +81,7 @@ $menu = hyprlauncher
 ### AUTOSTART ###
 #################
 
-exec-once = systemctl --user start hyprpolkitagent
-exec-once = nwg-panel
+exec-once = waybar
 exec-once = nwg-dock-hyprland
 exec-once = wl-paste --type text --watch cliphist store # Stores only text data
 exec-once = wl-paste --type image --watch cliphist store # Stores only image data
@@ -297,8 +303,48 @@ windowrule {
     float = yes
 }
 EOF
+
+        # The waybar config shipped in /etc/xdg uses sway modules, so give it
+        # Hyprland ones. The default style.css is still picked up from /etc/xdg.
+        mkdir -p "$USER_HOME/.config/waybar"
+        cat >"$USER_HOME/.config/waybar/config.jsonc" <<'EOF'
+{
+    "layer": "top",
+    "position": "top",
+    "height": 30,
+    "modules-left": ["hyprland/workspaces"],
+    "modules-center": ["hyprland/window"],
+    "modules-right": ["tray", "pulseaudio", "network", "battery", "clock"],
+    "tray": {
+        "spacing": 10
+    },
+    "pulseaudio": {
+        "format": "vol {volume}%",
+        "format-muted": "muted",
+        "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+    },
+    "network": {
+        "format-wifi": "{essid} {signalStrength}%",
+        "format-ethernet": "{ipaddr}",
+        "format-disconnected": "offline",
+        "tooltip-format": "{ifname} {ipaddr}/{cidr}"
+    },
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "bat {capacity}%",
+        "format-charging": "chg {capacity}%"
+    },
+    "clock": {
+        "format": "{:%a %d %b %H:%M}",
+        "tooltip-format": "<tt>{calendar}</tt>"
+    }
+}
+EOF
         # Fix ownership
-        chown -R "$USER_NAME:$USER_NAME" "$USER_HOME/.config/hypr"
+        chown -R "$USER_NAME:$USER_NAME" "$USER_HOME/.config/hypr" "$USER_HOME/.config/waybar"
     else
         echo "Warning: Could not find user home directory for Hyprland config"
     fi
