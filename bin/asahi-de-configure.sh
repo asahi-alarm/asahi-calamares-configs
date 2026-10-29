@@ -110,7 +110,7 @@ local menu        = "hyprlauncher"
 -- graphical-session.target
 hl.on("hyprland.start", function ()
     hl.exec_cmd("waybar")
-    hl.exec_cmd("nwg-dock-hyprland")
+    hl.exec_cmd("nwg-dock-hyprland -d") -- auto-hide, shows when the pointer hits the bottom edge
     hl.exec_cmd("wl-paste --type text --watch cliphist store")  -- Stores only text data
     hl.exec_cmd("wl-paste --type image --watch cliphist store") -- Stores only image data
 
@@ -476,6 +476,8 @@ EOF
 }
 EOF
         # Fix ownership
+        # mkdir -p above may have created ~/.config itself as root
+        chown "$USER_NAME:$USER_NAME" "$USER_HOME/.config"
         chown -R "$USER_NAME:$USER_NAME" "$USER_HOME/.config/hypr" "$USER_HOME/.config/waybar"
     else
         echo "Warning: Could not find user home directory for Hyprland config"
