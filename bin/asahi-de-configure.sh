@@ -32,18 +32,24 @@ case "$DM" in
     systemctl enable cosmic-greeter.service
     ;;
 *)
-    echo "Unknown display manager: $DM, defaulting to sddm"
-    systemctl enable sddm.service
+    # e.g. a display manager entered on the custom page
+    if ! systemctl enable "$DM.service"; then
+        echo "Unknown display manager: $DM, defaulting to sddm"
+        systemctl enable sddm.service
+    fi
     ;;
 esac
 
 # Read the desktop environment selection
 DE=$(cat /tmp/calamares-de 2>/dev/null || echo "")
 
-# Read the username from calamares. The de-packages page comes before the
-# users page, so the file is usually empty; the users module has created the
-# account by now, so fall back to the first regular user.
-USER_NAME=$(cat /tmp/calamares-user 2>/dev/null || echo "")
+# The username is passed by shellprocess-postinstall.conf. Fall back to the
+# file from the de-packages page (usually empty, as that page comes before
+# the users page) and then to the first regular user.
+USER_NAME=$1
+if [ -z "$USER_NAME" ]; then
+    USER_NAME=$(cat /tmp/calamares-user 2>/dev/null || echo "")
+fi
 if [ -z "$USER_NAME" ]; then
     USER_NAME=$(getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 { print $1; exit }')
 fi

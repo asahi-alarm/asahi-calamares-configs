@@ -89,9 +89,20 @@ while [ $attempt -le $MAX_RETRIES ]; do
         continue
     fi
 
-    # Try to install packages
+    # Packages published after the image was built may be signed by keys the
+    # image does not know yet, so update the installed keyrings first
+    keyrings=$(pacman -Qq | grep -- '-keyring$')
+    if [ -n "$keyrings" ]; then
+        echo "Updating keyrings: $keyrings"
+        pacman -S --noconfirm --needed --disable-download-timeout $keyrings ||
+            echo "Warning: keyring update failed, continuing"
+    fi
+
+    # Upgrade the system together with the new packages: installing from
+    # freshly synced repos on top of the image's older packages would be a
+    # partial upgrade
     echo "Installing packages..."
-    if pacman -S --noconfirm --needed --disable-download-timeout $INSTALL_LIST; then
+    if pacman -Su --noconfirm --needed --disable-download-timeout $INSTALL_LIST; then
         echo ""
         echo "=== Package installation successful ==="
         exit 0
